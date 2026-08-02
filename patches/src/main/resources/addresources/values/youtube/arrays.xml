@@ -1,16 +1,16 @@
 <resources>
-    <string-array name="morphe_yandex_vot_target_language_entries">
+    <string-array name="dualvot_yandex_target_language_entries">
         <item>Русский</item>
         <item>English</item>
         <item>Қазақша</item>
     </string-array>
-    <string-array name="morphe_yandex_vot_target_language_entry_values">
+    <string-array name="dualvot_yandex_target_language_entry_values">
         <item>ru</item>
         <item>en</item>
         <item>kk</item>
     </string-array>
-    <string-array name="morphe_yandex_vot_source_language_entries">
-        <item>@string/morphe_yandex_vot_lang_auto</item>
+    <string-array name="dualvot_yandex_source_language_entries">
+        <item>@string/dualvot_yandex_lang_auto</item>
         <item>English</item>
         <item>Français</item>
         <item>Deutsch</item>
@@ -20,7 +20,7 @@
         <item>日本語</item>
         <item>한국어</item>
     </string-array>
-    <string-array name="morphe_yandex_vot_source_language_entry_values">
+    <string-array name="dualvot_yandex_source_language_entry_values">
         <item>auto</item>
         <item>en</item>
         <item>fr</item>
@@ -30,5 +30,15 @@
         <item>zh</item>
         <item>ja</item>
         <item>ko</item>
+    </string-array>
+    <string-array name="dualvot_yandex_timer_position_entries">
+        <item>@string/dualvot_yandex_timer_position_entry_inside</item>
+        <item>@string/dualvot_yandex_timer_position_entry_below</item>
+        <item>@string/dualvot_yandex_timer_position_entry_hidden</item>
+    </string-array>
+    <string-array name="dualvot_yandex_timer_position_entry_values">
+        <item>inside</item>
+        <item>below</item>
+        <item>hidden</item>
     </string-array>
 </resources>

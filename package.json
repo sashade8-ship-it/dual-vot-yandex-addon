@@ -1,17 +1,10 @@
 {
-  "name": "morphe-patches-yavot",
-  "description": "Yandex voice-over translation add-on for Morphe Patches",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/MarcaDian/morphe-patches-yavot.git"
-  },
+  "name": "dual-vot-yandex-addon",
+  "private": true,
+  "description": "Development-only validation helpers for the Dual VoT Yandex Add-on",
   "license": "GPL-3.0",
-  "devDependencies": {
-    "@MorpheApp/changelog": "git+https://github.com/MorpheApp/changelog.git#bundle",
-    "@semantic-release/exec": "^7.1.0",
-    "@semantic-release/git": "^10.0.1",
-    "conventional-changelog-conventionalcommits": "^9.3.1",
-    "gradle-semantic-release-plugin": "^1.10.3",
-    "semantic-release": "^25.0.5"
+  "scripts": {
+    "validate:source": "python .github/scripts/validate_addon.py --source",
+    "test:validation": "python .github/scripts/test_validate_addon.py"
   }
 }

@@ -1,0 +1,95 @@
+name: PR validation
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source:
+    name: Source and policy validation
+    runs-on: ubuntu-latest
+    outputs:
+      base_remote_available: ${{ steps.compatibility.outputs.remote_available }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Validate development policy
+        run: python .github/scripts/validate_addon.py --source
+
+      - name: Test validation rules
+        run: python .github/scripts/test_validate_addon.py
+
+      - name: Read immutable base pin
+        id: compatibility
+        run: python .github/scripts/ci_config.py --github-output "$GITHUB_OUTPUT"
+
+      - name: Explain pending remote pin
+        if: steps.compatibility.outputs.remote_available != 'true'
+        run: >-
+          echo "The locally verified API-v1 commit is intentionally not treated as remote until it is pushed;
+          source validation completed and the build job is skipped."
+
+  build:
+    name: Build add-on against pinned API v1 base
+    needs: source
+    if: needs.source.outputs.base_remote_available == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: dual-vot-yandex-addon
+
+      - name: Read immutable base pin
+        id: compatibility
+        working-directory: dual-vot-yandex-addon
+        run: python .github/scripts/ci_config.py --github-output "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v5
+        with:
+          repository: ${{ steps.compatibility.outputs.repository }}
+          ref: ${{ steps.compatibility.outputs.ref }}
+          path: morphe-addon-api
+          fetch-depth: 1
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Compile pinned base extension classes
+        working-directory: morphe-addon-api
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >-
+          ./gradlew :extensions:youtube:compileReleaseKotlin
+          :extensions:youtube:compileReleaseJavaWithJavac --no-daemon --stacktrace
+
+      - name: Build independent add-on
+        working-directory: dual-vot-yandex-addon
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew :patches:buildAndroid generatePatchesList --no-daemon --stacktrace
+
+      - name: Create and validate development artifact manifest
+        working-directory: dual-vot-yandex-addon
+        run: |
+          python .github/scripts/create_release_manifest.py \
+            --artifact patches/build/libs/${{ steps.compatibility.outputs.artifact_name }} \
+            --output build/release-manifest.json
+          python .github/scripts/validate_addon.py --source \
+            --manifest build/release-manifest.json \
+            --artifact patches/build/libs/${{ steps.compatibility.outputs.artifact_name }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dual-vot-yandex-addon-development-artifact
+          path: |
+            dual-vot-yandex-addon/patches/build/libs/${{ steps.compatibility.outputs.artifact_name }}
+            dual-vot-yandex-addon/build/release-manifest.json
+            dual-vot-yandex-addon/patches-list.json
+          if-no-files-found: error

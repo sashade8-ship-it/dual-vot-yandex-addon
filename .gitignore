@@ -35,3 +35,12 @@ google-services.json
 
 # NPM modules
 node_modules/
+
+# Python validation bytecode
+__pycache__/
+
+# Local agent handoff. These files are intentionally never published.
+AGENTS.md
+CLAUDE.md
+HANDOFF.md
+HANDOFF_HISTORY.md

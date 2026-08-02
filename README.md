@@ -1,103 +1,72 @@
-# Morphe Patches: Yandex VoT add-on
+# Dual VoT Yandex Add-on
 
-Yandex voice-over translation add-on for [Morphe Patches](https://github.com/MorpheApp/morphe-patches).
+An independent, GPLv3 `Voice Over Translation (Yandex)` add-on for YouTube patching. It is development-only and interoperates with the compatible platform through `AddOnApi` v1; it is not an official Morphe project or a replacement for the base bundle.
 
-This bundle ships the `Voice Over Translation (Yandex)` patch for YouTube. It is meant to be loaded **alongside** the base `morphe-patches` bundle in Morphe Manager, not as a replacement. All classes, resources, preference keys and extension descriptors are renamed with a `yandex_vot` / `YandexVot*` prefix so nothing collides with the built-in Google-TTS-based VoT patch.
+## Support status
 
-## Install
+Development support is pinned to `sashade8-ship-it/dual-vot-patches` commit `158624f739887719f46f66c2f8cc42cbbcbbcb74`. That commit has been verified locally but is explicitly **pending push**: do not treat it as a remotely available build input yet.
 
-1. Install/keep the base [morphe-patches](https://github.com/MorpheApp/morphe-patches) bundle in [Morphe Manager](https://github.com/MorpheApp/morphe-manager).
-2. Add this bundle as an additional source in Morphe Manager (`Patch sources → Add`).
-3. Keep the `Add-on support` patch of the base bundle enabled. It provides the hooks this bundle attaches to, and patching fails with a message if it is missing.
-4. When patching YouTube, both patches are available:
-   - `Voice Over Translation` (base, Google/OpenRouter/MyMemory backends)
-   - `Voice Over Translation (Yandex)` (this bundle)
+The intended canonical product home is `https://github.com/sashade8-ship-it/dual-vot-yandex-addon`. It is planned metadata only until the repository is actually created and verified; this work does not publish, push, or release it.
 
-## What is renamed vs upstream yavot
+Stable support is intentionally blocked until an official upstream tag is verified to expose the complete `AddOnApi.API_VERSION == 1` contract. The machine-readable policy is in [.github/compatibility.json](.github/compatibility.json).
 
-Everything that would get baked into the patched YouTube APK uses a distinct namespace:
+## What the add-on provides
 
-- Kotlin patch package: `app.morphe.patches.youtube.video.yandexvot`
-- Extension package: `app.morphe.extension.youtube.patches.yandexvot`
-- Player button class: `YandexVotButton` (was `VoiceOverTranslationButton`)
-- OAuth preference class: `YandexVotOAuthPreference`
-- Settings constants: `YANDEX_VOT_ENABLED`, `YANDEX_VOT_SOURCE_LANGUAGE`, ...
-- SharedPreferences keys: `morphe_yandex_vot_*` (was `morphe_vot_*`)
-- Drawables: `morphe_yt_yandex_vot(_activated).xml`
-- Settings sit directly next to the built in `Voice over translation` entry on the `Video` screen, under the key `morphe_vot_screen_yandex`, and are titled the same with `(Yandex)` appended.
+- A separate Yandex translation button in modern and legacy player controls.
+- Long-press configuration, translated/original-volume controls, proxy fallback, live voices, OAuth sign-in, retry/fallback behavior, and cancellation on video changes.
+- Countdown, progress ring, color, thickness, and error state for the modern player button. The custom view layers over the API-v1 host button so the host retains its own layout and spacing ownership.
+- An isolated `dualvot_yandex_*` settings screen, with a one-time non-overwriting migration from the prototype’s `morphe_yandex_vot_*` keys.
+- Exclusive voice-over ownership through `AddOnApi` v1. Starting Yandex first stops the active engine; all terminal paths, errors, pauses, and video transitions clear Yandex through the same coordinator.
 
-## How the add-on attaches to the base bundle
+The patch begins with a mandatory bytecode compatibility gate. It verifies `API_VERSION == 1`, every coordinator method the add-on calls, and `AddOnManager.registerAddOns()V` before resource writes, extension merge, registration injection, or the `AudioTrack` hook.
 
-Morphe Manager loads every patch bundle in its own class loader, so this bundle cannot reference
-any patch of morphe-patches. Everything goes through the patched app instead, using the hooks the
-`Add-on support` patch of morphe-patches provides:
+## Build locally
 
-- The patch adds a call to `YandexVotAddOn.register()` to `AddOnManager.registerAddOns()` of the
-  base extension, in a finalize block.
-- `register()` subscribes to `AddOnApi`: player overlay buttons, legacy player controls, new video,
-  video id and video time.
-- The player button uses `PlayerOverlayButton.addButton()`, and in the old player layout one of the
-  legacy button slots the base bundle reserves for add-ons.
-- Preferences are declared in `morphe_addon_prefs.xml` with `after="morphe_vot_screen"`, so the
-  settings patch places them right next to the built in voice over translation entry. Strings,
-  arrays and drawables are written into the app resources by this bundle itself.
+Use a sibling API-v1 base checkout named `morphe-addon-api`:
 
-Only the `AudioTrack.setVolume` hook that ducks the original audio is patched directly, using a
-fingerprint of this bundle.
-
-## Build
-
-Requires a sibling checkout of `morphe-patcher`, `morphe-patches-library`, and — for the extension
-code only — `morphe-patches`:
-
-```
-StudioProjects/
-├── morphe-patcher
-├── morphe-patches
-├── morphe-patches-library
-└── morphe-patches-yavot  ← this repo
+```text
+.addon-work/
+├── morphe-addon-api/          # pinned compatible platform base
+└── dual-vot-yandex-addon/     # this repository
 ```
 
-The patch code (`patches/`) depends on `morphe-patcher` and `morphe-patches-library` only. The
-extension code compiles against the compiled extension classes of morphe-patches with
-`compileOnly`, since all extensions end up in the same patched app. Build the base extension first:
+Compile the base extension classes first, then build the add-on. On Windows, the local project uses JDK 21 and the Android SDK configured by the workspace.
 
+```powershell
+Set-Location ..\morphe-addon-api
+.\gradlew.bat :extensions:youtube:compileReleaseKotlin :extensions:youtube:compileReleaseJavaWithJavac --no-daemon --stacktrace
+
+Set-Location ..\dual-vot-yandex-addon
+.\gradlew.bat :patches:buildAndroid generatePatchesList --no-daemon --stacktrace
 ```
-../morphe-patches/gradlew :extensions:youtube:compileReleaseKotlin :extensions:youtube:compileReleaseJavaWithJavac
+
+If the Gradle package repository needs credentials merely to configure, use non-secret local placeholder values for an offline cache build; never add a real token to source control.
+
+The resulting development artifact is `patches-1.0.0-dev.1.mpp`. It is not published or released by this repository.
+
+## Validate an artifact
+
+```powershell
+python .github/scripts/validate_addon.py --source
+python .github/scripts/test_validate_addon.py
+python .github/scripts/create_release_manifest.py `
+  --artifact patches/build/libs/patches-1.0.0-dev.1.mpp `
+  --output build/release-manifest.json
+python .github/scripts/validate_addon.py --source `
+  --manifest build/release-manifest.json `
+  --artifact patches/build/libs/patches-1.0.0-dev.1.mpp
 ```
 
-## What is bundled
+Validation requires the exact development version and asset name, one Yandex patch only, matching artifact size and SHA-256, and timezone-free `created_at` fields. It also rejects the old prototype package tree so base patches cannot leak into this add-on bundle.
 
-- 1 Kotlin patch plus its add-on support helpers (`YandexVoiceOverTranslationPatch.kt`, `AddOn.kt`)
-- 9 Java extension classes (`YandexVot*`, including the add-on entry point `YandexVotAddOn`)
-- `YandexVotSettings.java` (9 setting fields, isolated from base's `Settings.java`)
-- `yandexvotbutton/` drawables
-- Filtered `strings.xml` and `arrays.xml` with only `morphe_yandex_vot_*` keys (en + ru + uk)
+## CI
 
-## Credits
+- `PR validation` validates source policy and the manifest rules on pull requests.
+- Once the pinned SHA is actually pushed and `availability` becomes `remote-available`, the same workflow also compiles the pinned base and add-on together.
+- `Development prerelease candidate` runs for `v*-dev.*` tags and uploads a candidate artifact plus manifest. It deliberately does not create a GitHub release, publish packages, push tags, or modify release metadata.
 
-Yandex VoT implementation:
-- [Jav1x](https://github.com/Jav1x) — original author of the patch, Morphe port
-- [anddea](https://github.com/anddea) — revanced-patches port
+## Credits and license
 
-Base bundle: [Morphe Patches](https://github.com/MorpheApp/morphe-patches), [Morphe Manager](https://github.com/MorpheApp/morphe-manager), [Morphe Patcher](https://github.com/MorpheApp/morphe-patcher).
+This repository retains the historical two-commit MarcaDian Yandex add-on prototype as its initial history. The Yandex implementation preserves upstream attribution to Jav1x and anddea, including GPLv3 Section 7 notices. Its independent YouTube audio-stream fallback retains the MIT notice for sodapng and ilyhalight.
 
-## Patches
-
-<!-- PATCHES_START EXPANDED -->
-> **[v1.0.0](https://github.com/MarcaDian/morphe-patches-yavot/releases/tag/v1.0.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;1 patches total
-<details open>
-<summary>📦 YouTube&nbsp;&nbsp;•&nbsp;&nbsp;1 patch</summary>
-<br>
-
-| 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
-|----------|----------------|-----------|
-| [Voice Over Translation (Yandex)](#voice-over-translation-yandex) | Adds an option to enable Yandex voice-over translation of video audio tracks. Requires the "Add-on support" patch of Morphe Patches. |  |
-
-</details>
-
-<!-- PATCHES_END -->
-
-## License
-
-GNU General Public License v3.0, with additional GPL Section 7 attribution terms for portions authored by anddea/Jav1x. See `LICENSE` and `NOTICE`.
+`Dual VoT Yandex Add-on` is a distinct product name. “Morphe” is used only as an accurate compatibility description. See [LICENSE](LICENSE) and [NOTICE](NOTICE).

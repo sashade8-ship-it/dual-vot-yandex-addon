@@ -1,4 +1,4 @@
-rootProject.name = "morphe-patches-yavot"
+rootProject.name = "dual-vot-yandex-addon"
 
 pluginManagement {
     repositories {
@@ -25,7 +25,7 @@ plugins {
 
 settings {
     extensions {
-        defaultNamespace = "app.morphe.extension"
+        defaultNamespace = "app.dualvot.extension"
 
         // Must resolve to an absolute path (not relative),
         // otherwise the extensions in subfolders will fail to find the proguard config.

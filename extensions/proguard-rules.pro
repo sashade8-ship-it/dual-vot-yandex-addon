@@ -1,7 +1,7 @@
 -dontobfuscate
 -dontoptimize
 -keepattributes *
--keep class app.morphe.** {
+-keep class app.dualvot.** {
   *;
 }
 -keep class com.google.** {
@@ -14,6 +14,6 @@
 -dontwarn java.lang.reflect.AnnotatedType
 -dontwarn javax.lang.model.element.Modifier
 
-# Base morphe-patches classes are provided by base bundle's extension DEX at runtime.
-# Yavot references them via compileOnly, so R8 sees them as missing during minify.
+# Compatible platform classes are provided by the base bundle's extension DEX at runtime.
+# The add-on references them via compileOnly, so R8 sees them as missing during minify.
 -dontwarn app.morphe.extension.**

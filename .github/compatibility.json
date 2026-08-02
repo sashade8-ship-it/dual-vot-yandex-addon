@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "product": {
+    "name": "Dual VoT Yandex Add-on",
+    "channel": "development",
+    "version": "1.0.0-dev.1",
+    "artifact_name": "patches-1.0.0-dev.1.mpp",
+    "patch_name": "Voice Over Translation (Yandex)"
+  },
+  "add_on_api": {
+    "required_version": 1,
+    "class_descriptor": "Lapp/morphe/extension/youtube/addon/AddOnApi;",
+    "required_methods": [
+      "registerVoiceOverEngine(Ljava/lang/String;Ljava/lang/Runnable;)Z",
+      "activateVoiceOverEngine(Ljava/lang/String;)Z",
+      "deactivateVoiceOverEngine(Ljava/lang/String;)Z",
+      "stopActiveVoiceOverEngine()Z",
+      "getActiveVoiceOverEngineId()Ljava/lang/String;",
+      "addVoiceOverEngineListener(Ljava/util/function/Consumer;)V",
+      "removeVoiceOverEngineListener(Ljava/util/function/Consumer;)V"
+    ]
+  },
+  "add_on_manager": {
+    "class_descriptor": "Lapp/morphe/extension/youtube/addon/AddOnManager;",
+    "required_methods": [
+      "registerAddOns()V"
+    ]
+  },
+  "base_support": {
+    "development": {
+      "repository": "sashade8-ship-it/dual-vot-patches",
+      "commit": "158624f739887719f46f66c2f8cc42cbbcbbcb74",
+      "availability": "local-verified-pending-push",
+      "notes": "This immutable API-v1 commit passed local base verification. It must not be treated as remotely available until pushed."
+    },
+    "stable": {
+      "minimum_official_upstream_tag": null,
+      "required_api_version": 1,
+      "status": "blocked-until-first-official-upstream-addon-api-v1-tag",
+      "policy": "Stable support begins only after an official upstream tag is verified to contain AddOnApi.API_VERSION == 1 and the complete required method surface."
+    }
+  }
+}
