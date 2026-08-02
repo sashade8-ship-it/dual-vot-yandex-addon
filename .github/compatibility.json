@@ -29,7 +29,7 @@
   "base_support": {
     "development": {
       "repository": "sashade8-ship-it/dual-vot-patches",
-      "commit": "158624f739887719f46f66c2f8cc42cbbcbbcb74",
+      "commit": "c73d8555dbe0bd8db25a516bc2490331b5341001",
       "availability": "local-verified-pending-push",
       "notes": "This immutable API-v1 commit passed local base verification. It must not be treated as remotely available until pushed."
     },

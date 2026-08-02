@@ -4,7 +4,7 @@ An independent, GPLv3 `Voice Over Translation (Yandex)` add-on for YouTube patch
 
 ## Support status
 
-Development support is pinned to `sashade8-ship-it/dual-vot-patches` commit `158624f739887719f46f66c2f8cc42cbbcbbcb74`. That commit has been verified locally but is explicitly **pending push**: do not treat it as a remotely available build input yet.
+Development support is pinned to `sashade8-ship-it/dual-vot-patches` commit `c73d8555dbe0bd8db25a516bc2490331b5341001`. That commit has been verified locally but is explicitly **pending push**: do not treat it as a remotely available build input yet.
 
 The intended canonical product home is `https://github.com/sashade8-ship-it/dual-vot-yandex-addon`. It is planned metadata only until the repository is actually created and verified; this work does not publish, push, or release it.
 
