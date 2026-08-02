@@ -124,7 +124,7 @@ final class YandexVotAudioDownloader {
             AudioFormatInfo audioFormat = fetchAudioFormat(videoId);
             if (listener.isCancelled()) return false;
             if (audioFormat == null || isEmpty(audioFormat.url())) {
-                Logger.printDebug(() -> "Yandex VOT audio upload: no audio format for " + videoId);
+                Logger.printDebug(() -> "Yandex VOT audio upload: no audio format");
                 return false;
             }
 
@@ -134,7 +134,7 @@ final class YandexVotAudioDownloader {
                     : resolveFileSize(audioUrl);
             if (listener.isCancelled()) return false;
             if (fileSize <= 0) {
-                Logger.printDebug(() -> "Yandex VOT audio upload: unknown audio size for " + videoId);
+                Logger.printDebug(() -> "Yandex VOT audio upload: unknown audio size");
                 return false;
             }
 
@@ -166,7 +166,8 @@ final class YandexVotAudioDownloader {
 
             return true;
         } catch (Exception e) {
-            Logger.printException(() -> "Yandex VOT audio upload failed for " + videoId, e);
+            Logger.printException(() -> "Yandex VOT audio upload failed ("
+                    + e.getClass().getSimpleName() + ")");
             return false;
         }
     }

@@ -268,7 +268,7 @@ public class YandexVotAuthWebViewDialog extends Dialog {
             public void onReceivedError(WebView view, android.webkit.WebResourceRequest request,
                                         android.webkit.WebResourceError error) {
                 super.onReceivedError(view, request, error);
-                Logger.printDebug(() -> "VotAuthWebView: error loading page: " + error.getDescription());
+                Logger.printDebug(() -> "VotAuthWebView: error loading page");
             }
         });
 
@@ -292,5 +292,3 @@ public class YandexVotAuthWebViewDialog extends Dialog {
         return (int) (dp * density + 0.5f);
     }
 }
-
-

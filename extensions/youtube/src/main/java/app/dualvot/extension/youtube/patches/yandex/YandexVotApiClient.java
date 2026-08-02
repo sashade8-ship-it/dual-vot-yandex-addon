@@ -174,10 +174,10 @@ public class YandexVotApiClient {
             if (query != null && !query.isEmpty()) {
                 proxyUrl.append("?").append(query);
             }
-            Logger.printDebug(() -> "toProxyAudioUrl: " + originalUrl + " -> " + proxyUrl);
+            Logger.printDebug(() -> "toProxyAudioUrl: proxy URL created");
             return proxyUrl.toString();
         } catch (URISyntaxException e) {
-            Logger.printDebug(() -> "toProxyAudioUrl: invalid URL " + originalUrl);
+            Logger.printDebug(() -> "toProxyAudioUrl: invalid URL");
             return originalUrl;
         }
     }
@@ -307,7 +307,7 @@ public class YandexVotApiClient {
         String cacheKey = videoUrl + "|" + sourceLang + "|" + targetLang + "|" + useLiveVoices;
         CachedResult cached = translationCache.get(cacheKey);
         if (cached != null && !cached.isExpired()) {
-            Logger.printDebug(() -> "VOT cache hit: " + cacheKey);
+            Logger.printDebug(() -> "VOT cache hit");
             return cached.result();
         }
         if (cached != null) {
@@ -378,7 +378,8 @@ public class YandexVotApiClient {
                 return result;
 
             } catch (Exception e) {
-                Logger.printException(() -> "YandexVotApiClient.requestTranslation failed for " + videoUrl, e);
+                Logger.printException(() -> "YandexVotApiClient.requestTranslation failed ("
+                        + e.getClass().getSimpleName() + ")");
                 return null;
             }
         }
@@ -437,8 +438,8 @@ public class YandexVotApiClient {
 
         boolean useProxy = isProxyEnabled();
         String requestUrl = getApiUrl(path);
-        Logger.printDebug(() -> "VOT sendApiRequest: " + method + " " + requestUrl
-                + (useProxy ? " via VOT worker" : ""));
+        Logger.printDebug(() -> "VOT sendApiRequest: method=" + method
+                + " proxy=" + useProxy);
 
         HttpURLConnection connection = (HttpURLConnection) new URL(requestUrl).openConnection();
         try {
@@ -472,8 +473,7 @@ public class YandexVotApiClient {
 
             int responseCode = connection.getResponseCode();
             if (responseCode != 200) {
-                Logger.printDebug(() -> "VOT sendApiRequest: " + requestUrl
-                        + " returned " + responseCode);
+                Logger.printDebug(() -> "VOT sendApiRequest: HTTP " + responseCode);
                 return null;
             }
 
@@ -536,8 +536,7 @@ public class YandexVotApiClient {
 
             boolean useProxy = isProxyEnabled();
             String requestUrl = getApiUrl(path);
-            Logger.printDebug(() -> "VOT createSession: POST " + requestUrl
-                    + (useProxy ? " via VOT worker" : ""));
+            Logger.printDebug(() -> "VOT createSession: method=POST proxy=" + useProxy);
 
             HttpURLConnection connection = (HttpURLConnection) new URL(requestUrl).openConnection();
             try {
@@ -598,16 +597,17 @@ public class YandexVotApiClient {
                 connection.disconnect();
             }
         } catch (UnknownHostException e) {
-            Logger.printException(() -> "VOT createSession failed: DNS resolution error", e);
+            Logger.printException(() -> "VOT createSession failed: DNS resolution error");
             return false;
         } catch (SocketTimeoutException e) {
-            Logger.printException(() -> "VOT createSession failed: connection timeout", e);
+            Logger.printException(() -> "VOT createSession failed: connection timeout");
             return false;
         } catch (ConnectException e) {
-            Logger.printException(() -> "VOT createSession failed: connection refused", e);
+            Logger.printException(() -> "VOT createSession failed: connection refused");
             return false;
         } catch (Exception e) {
-            Logger.printException(() -> "VOT createSession failed", e);
+            Logger.printException(() -> "VOT createSession failed ("
+                    + e.getClass().getSimpleName() + ")");
             return false;
         }
     }
@@ -661,7 +661,8 @@ public class YandexVotApiClient {
             // but DON'T cache so we re-validate when the network recovers.
             return true;
         } catch (Exception e) {
-            Logger.printDebug(() -> "VOT OAuth token validation failed: " + e.getMessage());
+            Logger.printDebug(() -> "VOT OAuth token validation failed ("
+                    + e.getClass().getSimpleName() + ")");
             // Unknown error — cache as invalid to prevent repeated failures.
             lastValidatedToken = token;
             tokenIsValid = false;
@@ -696,7 +697,8 @@ public class YandexVotApiClient {
             String jsonBody = "{\"video_url\":\"" + videoUrl + "\"}";
             sendJsonRequest(path, jsonBody, "PUT");
         } catch (Exception e) {
-            Logger.printException(() -> "YandexVotApiClient.sendFailedAudio failed for " + videoUrl, e);
+            Logger.printException(() -> "YandexVotApiClient.sendFailedAudio failed ("
+                    + e.getClass().getSimpleName() + ")");
         }
     }
 
@@ -711,7 +713,8 @@ public class YandexVotApiClient {
                     translationId, videoUrl, fileId, audioData);
             return sendAudioRequestBody(body);
         } catch (Exception e) {
-            Logger.printException(() -> "YandexVotApiClient.sendAudio failed for " + videoUrl, e);
+            Logger.printException(() -> "YandexVotApiClient.sendAudio failed ("
+                    + e.getClass().getSimpleName() + ")");
             return false;
         }
     }
@@ -738,8 +741,8 @@ public class YandexVotApiClient {
             return sendAudioRequestBody(body);
         } catch (Exception e) {
             Logger.printException(
-                    () -> "YandexVotApiClient.sendPartialAudio failed for " + videoUrl,
-                    e
+                    () -> "YandexVotApiClient.sendPartialAudio failed ("
+                            + e.getClass().getSimpleName() + ")"
             );
             return false;
         }
@@ -767,7 +770,8 @@ public class YandexVotApiClient {
             String path = "/video-translation/audio";
             sendApiRequest(path, body, "PUT", oauthToken);
         } catch (Exception e) {
-            Logger.printException(() -> "YandexVotApiClient.sendEmptyAudio failed for " + videoUrl, e);
+            Logger.printException(() -> "YandexVotApiClient.sendEmptyAudio failed ("
+                    + e.getClass().getSimpleName() + ")");
         }
     }
 
@@ -809,8 +813,7 @@ public class YandexVotApiClient {
             }
             int responseCode = connection.getResponseCode();
             if (responseCode < 200 || responseCode >= 300) {
-                Logger.printDebug(() -> "VOT sendJsonRequest: " + requestUrl
-                        + " returned " + responseCode);
+                Logger.printDebug(() -> "VOT sendJsonRequest: HTTP " + responseCode);
             }
         } finally {
             connection.disconnect();
@@ -839,5 +842,3 @@ public class YandexVotApiClient {
         return buffer.toByteArray();
     }
 }
-
-

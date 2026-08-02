@@ -270,7 +270,8 @@ public class YandexVotOAuthPreference extends Preference implements Preference.O
                     });
             dialog.show();
         } catch (Exception e) {
-            Logger.printException(() -> "YandexVotOAuthPreference: failed to open WebView", e);
+            Logger.printException(() -> "YandexVotOAuthPreference: failed to open WebView ("
+                    + e.getClass().getSimpleName() + ")");
             Utils.showToastLong(str("dualvot_yandex_oauth_no_network"));
         }
     }
@@ -382,20 +383,18 @@ public class YandexVotOAuthPreference extends Preference implements Preference.O
                         displayName = json.optString("login", null);
                     }
                 }
-                final String finalDisplayName = displayName;
-                Logger.printDebug(() -> "YandexVotOAuthPreference: fetched display_name=" + finalDisplayName);
-                return finalDisplayName;
+                Logger.printDebug(() -> "YandexVotOAuthPreference: profile fetch succeeded");
+                return displayName;
 
             } finally {
                 conn.disconnect();
             }
         } catch (Exception e) {
-            Logger.printException(() -> "YandexVotOAuthPreference: profile fetch failed", e);
+            Logger.printException(() -> "YandexVotOAuthPreference: profile fetch failed ("
+                    + e.getClass().getSimpleName() + ")");
             return null;
         }
     }
 
     //endregion
 }
-
-

@@ -586,10 +586,7 @@ public class YandexVoiceOverTranslationPatch {
             }
             Logger.printDebug(() -> "VOT response: status=" + result.status()
                     + " remainingTime=" + result.remainingTime()
-                    + " useLiveVoices=" + useLiveVoices
-                    + " audioUrl=" + (result.audioUrl() != null ? result.audioUrl().substring(0, Math.min(80, result.audioUrl().length())) : "null")
-                    + " translationId=" + result.translationId()
-                    + " message=" + result.message());
+                    + " useLiveVoices=" + useLiveVoices);
             int status = result.status();
             if (status == YandexVotApiClient.STATUS_FINISHED || status == YandexVotApiClient.STATUS_PART_CONTENT) {
                 if (result.audioUrl() != null && !result.audioUrl().isEmpty()) {
@@ -673,7 +670,8 @@ public class YandexVoiceOverTranslationPatch {
                 pollTranslation(videoId, videoTitle, youtubeUrl, durationSeconds, sourceLang, targetLang, waitTime, useLiveVoices, generation, 0);
             }
         } catch (Exception e) {
-            Logger.printException(() -> "requestTranslation failed", e);
+            Logger.printException(() -> "requestTranslation failed ("
+                    + e.getClass().getSimpleName() + ")");
             runOnUiIfCurrentGen(generation, () -> {
                 translationStarting = false;
                 refreshOriginalAudioVolume();
@@ -804,7 +802,8 @@ public class YandexVoiceOverTranslationPatch {
                 return;
             }
         } catch (Exception e) {
-            Logger.printException(() -> "pollTranslation failure", e);
+            Logger.printException(() -> "pollTranslation failure ("
+                    + e.getClass().getSimpleName() + ")");
             if (retryCount < 1 && translationGeneration == generation) {
                 // Retry once on exception
                 pollTranslation(videoId, videoTitle, url, duration, sourceLang, targetLang,
@@ -861,7 +860,7 @@ public class YandexVoiceOverTranslationPatch {
             }
             if (uploaded) {
                 lastSuccessfulAudioUploadKey = requestKey;
-                Logger.printDebug(() -> "Yandex VOT audio uploaded for " + videoId);
+                Logger.printDebug(() -> "Yandex VOT audio uploaded");
                 return true;
             }
         }
@@ -973,13 +972,14 @@ public class YandexVoiceOverTranslationPatch {
                 if (bytes < 1000) {
                     boolean deleted = tempFile.delete();
                     if (!deleted) {
-                        Logger.printDebug(() -> "VOT temp proxy file could not be deleted: " + tempFile.getAbsolutePath());
+                        Logger.printDebug(() -> "VOT temp proxy file cleanup failed");
                     }
                     return null;
                 }
                 return tempFile.getAbsolutePath();
             } catch (Exception e) {
-                Logger.printException(() -> "VOT proxy fetch failed", e);
+                Logger.printException(() -> "VOT proxy fetch failed ("
+                        + e.getClass().getSimpleName() + ")");
                 return null;
             } finally {
                 if (fos != null) {
@@ -1053,7 +1053,8 @@ public class YandexVoiceOverTranslationPatch {
             notifyTranslationStateChanged();
             mp.prepareAsync();
         } catch (IOException e) {
-            Logger.printException(() -> "startAudioPlaybackFromFile failed", e);
+            Logger.printException(() -> "startAudioPlaybackFromFile failed ("
+                    + e.getClass().getSimpleName() + ")");
             deleteTempProxyFile();
             translationStarting = false;
             refreshOriginalAudioVolume();
@@ -1069,7 +1070,7 @@ public class YandexVoiceOverTranslationPatch {
                 File file = new File(path);
                 boolean deleted = file.delete();
                 if (!deleted) {
-                    Logger.printDebug(() -> "VOT temp proxy file could not be deleted: " + file.getAbsolutePath());
+                    Logger.printDebug(() -> "VOT temp proxy file cleanup failed");
                 }
             } catch (Exception ignored) { }
         }
@@ -1117,7 +1118,7 @@ public class YandexVoiceOverTranslationPatch {
                 notifyTranslationStateChanged();
             }));
             mp.setOnErrorListener((p, what, extra) -> {
-                Logger.printDebug(() -> "VOT MediaPlayer error: what=" + what + " extra=" + extra + " url=" + audioUrl);
+                Logger.printDebug(() -> "VOT MediaPlayer error: what=" + what + " extra=" + extra);
                 Utils.runOnMainThread(() -> {
                     if (!isCurrentGeneration(generation) || mediaPlayer.get() != p) return;
                     stopAudioPlayback();
@@ -1154,7 +1155,8 @@ public class YandexVoiceOverTranslationPatch {
             }
             mp.prepareAsync();
         } catch (IOException e) {
-            Logger.printException(() -> "startAudioPlayback failed for videoId: " + videoId, e);
+            Logger.printException(() -> "startAudioPlayback failed ("
+                    + e.getClass().getSimpleName() + ")");
             Utils.runOnMainThread(() -> {
                 if (fallbackUrl != null && !fallbackUrl.isEmpty()) {
                     startAudioPlayback(videoId, fallbackUrl, null, generation);

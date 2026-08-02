@@ -478,5 +478,3 @@ public class YandexVotBottomSheet {
     }
 
 }
-
-

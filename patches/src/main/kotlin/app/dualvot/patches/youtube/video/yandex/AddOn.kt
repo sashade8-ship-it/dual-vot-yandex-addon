@@ -50,7 +50,6 @@ private val bundledResourceLocales = mapOf(
     "values-ru-rRU" to "values-ru",
     "values-uk-rUA" to "values-uk",
 )
-
 /**
  * Adds a call to the registration method of this add-on to the add-on manager of Morphe Patches.
  *
@@ -251,4 +250,3 @@ internal fun nonInteractivePreference(
     summaryKey = "${key}_summary",
     extraAttributes = mapOf("android:selectable" to selectable.toString()),
 )
-
