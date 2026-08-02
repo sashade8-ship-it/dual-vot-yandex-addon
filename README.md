@@ -4,9 +4,9 @@ An independent, GPLv3 `Voice Over Translation (Yandex)` add-on for YouTube patch
 
 ## Support status
 
-Development support is pinned to `sashade8-ship-it/dual-vot-patches` commit `c73d8555dbe0bd8db25a516bc2490331b5341001`. That commit has been verified locally but is explicitly **pending push**: do not treat it as a remotely available build input yet.
+Development support is pinned to the remotely available `sashade8-ship-it/dual-vot-patches` commit `c73d8555dbe0bd8db25a516bc2490331b5341001`. That immutable commit passed the local API, unit-test, and bundle build checks documented below.
 
-The intended canonical product home is `https://github.com/sashade8-ship-it/dual-vot-yandex-addon`. It is planned metadata only until the repository is actually created and verified; this work does not publish, push, or release it.
+The canonical product home is `https://github.com/sashade8-ship-it/dual-vot-yandex-addon`. Development source may be published there, but this repository does not automatically publish release artifacts.
 
 Stable support is intentionally blocked until an official upstream tag is verified to expose the complete `AddOnApi.API_VERSION == 1` contract. The machine-readable policy is in [.github/compatibility.json](.github/compatibility.json).
 
@@ -62,7 +62,7 @@ Validation requires the exact development version and asset name, one Yandex pat
 ## CI
 
 - `PR validation` validates source policy and the manifest rules on pull requests.
-- Once the pinned SHA is actually pushed and `availability` becomes `remote-available`, the same workflow also compiles the pinned base and add-on together.
+- Because the immutable base pin is `remote-available`, the same workflow also compiles the pinned base and add-on together.
 - `Development prerelease candidate` runs for `v*-dev.*` tags and uploads a candidate artifact plus manifest. It deliberately does not create a GitHub release, publish packages, push tags, or modify release metadata.
 
 ## Credits and license
